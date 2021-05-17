@@ -1,5 +1,9 @@
 import itertools
+import pickle
 
+DUMP_FILE = "precomputation.pyb"
+
+# Old and inefficient version
 def ddistribution(boxes, balls):
   rng = list(range(balls + 1)) * boxes
   dist = set(i for i in itertools.permutations(rng, boxes) if sum(i) == balls)
@@ -21,13 +25,24 @@ def _distribution(boxes, balls):
         bucket = new_bucket
     return table
 
+
+def load():
+    with open(DUMP_FILE, "rb") as f:
+        return pickle.load(f)
+
+def dump(table):
+    with open(DUMP_FILE, "wb") as f:
+        return pickle.dump(table, f)
+
+# TODO find out what is needed for what board sizes in the worst case
+# 10, 20
 def precompute(boxes, balls):
     table = {}
     for b in range(boxes + 1):
         table[b] = _distribution(b, balls)
-    return table
+    return dump(table)
 
-lookup = precompute(7, 16)
+lookup = load()
 
 def distribution(boxes, balls):
   return lookup[boxes][balls]
