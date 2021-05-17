@@ -22,6 +22,7 @@ class Nanogram:
     self.vertical = vertical
     self.board = [[KEINE for v in range(len(self.vertical))] for h in range(len(self.horizontal))]
     self.sleep = kwargs["sleep"] or SLEEP
+    self._old = None
 
   @classmethod
   def load(cls, path, **kwargs):
@@ -82,7 +83,7 @@ class Nanogram:
       sleep(self.sleep)
 
   def done(self):
-    return any(i == KEINE for line in self.board for i in line)
+    return all(i != KEINE for line in self.board for i in line)
 
   def set(self, offset, speile, row=True):
     if row:
@@ -90,6 +91,9 @@ class Nanogram:
     else:
       for b, s in zip(self.board, speile):
         b[offset] = s
+
+  def hash(self):
+    return "".join(map(str, self.board))
 
   def solve(self):
     # Iteratively applies constraints
