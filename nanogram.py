@@ -5,11 +5,6 @@ SQUARE = 1
 CROSS = -1
 KEINE = 0
 
-"""
-
-Precompute the distributions!
-
-"""
 class Nanogram:
   def __str__(self):
     # trans = str.maketrans({SQUARE: "■", KEINE: "", CROSS: "⛌"})
@@ -53,20 +48,17 @@ class Nanogram:
       ball_in_mask = sum(mask)
       ball_left = len(speile) - 2 - ball_in_mask - sum(info)
       boxes = len(mask)
-      # print(ball_left, boxes)
-
-      key = "ROW" if row else "COL"
       dists =  distribution(boxes, ball_left)
       
       overall_data_square = [ 1 for i in range(len(speile) - 2)]
       overall_data_cross = [ -1 for i in range(len(speile) - 2)]
       overall_data = [ 0 for i in range(len(speile) - 2)]
       for d in dists:
+        d = [ d[i] + mask[i] for i in range(len(d))]
         data = [CROSS] * d[0]
         for ih, h in enumerate(info):
           data.extend([SQUARE] * h)
           data.extend([CROSS] * d[ih+1])
-
         if not self.compare_speile(data, speile):
           continue 
         # data += [CROSS] * d[-1]
