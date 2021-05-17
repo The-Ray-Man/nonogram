@@ -9,12 +9,12 @@ SQUARE = 1
 CROSS = -1
 KEINE = 0
 
-class Nanogram:
-  @classmethod
-  def load(cls, path, **kwargs):
-    data = toml.load(path)
-    return cls(data["horizontal"], data["vertical"], **kwargs)
+def translate(row):
+    row = ["■" if e == SQUARE else e for e in row]
+    row = ["⛌" if e == CROSS else e for e in row]
+    return ["" if e == KEINE else e for e in row]
 
+class Nanogram:
   def __init__(self, horizontal, vertical, **kwargs):
     self.horizontal = horizontal
     self.vertical = vertical
@@ -22,11 +22,13 @@ class Nanogram:
     self.sleep = kwargs["sleep"] or SLEEP
     self._old = None
 
+  @classmethod
+  def load(cls, path, **kwargs):
+    data = toml.load(path)
+    return cls(data["horizontal"], data["vertical"], **kwargs)
+
   def __str__(self):
-    field = [[self.vertical[y]] + self.board[y] for y in range(len(self.board))]
-    field = [["■" if e == SQUARE else e for e in row] for row in field]
-    field = [["⛌" if e == CROSS else e for e in row] for row in field]
-    field = [["" if e == KEINE else e for e in row] for row in field]
+    field = [[v] + translate(row) for v, row in zip(self.vertical, self.board)]
     return tabulate(field, headers=self.horizontal, tablefmt="fancy_grid", stralign="center")
 
   def step(self):
