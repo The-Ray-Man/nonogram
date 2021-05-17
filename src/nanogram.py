@@ -33,7 +33,7 @@ class Nanogram:
     field = [[v] + translate(row) for v, row in zip(self.vertical, self.board)]
     return tabulate(field, headers=self.horizontal, tablefmt="fancy_grid", stralign="center")
 
-  def _check(self, speile, info, offset, row):
+  def substep(self, speile, info):
       # if info is 1 2 1
       # there needs to be at least a cross in the interior gaps: 1 x 2 x 1
       mask = [KEINE] + [SQUARE for _ in range(len(info) -1 )] + [KEINE]
@@ -41,40 +41,49 @@ class Nanogram:
       boxes = len(mask)
       common_square = [  1 for _ in speile]
       common_cross  = [ -1 for _ in speile]
+
+      def inflate(crosses, info):
+        data = [CROSS] * crosses[0]
+        for i, d in zip(info, crosses[1:]):
+          data.extend([SQUARE] * i + [CROSS] * d)
+        return data
+
+      def compatible(guess, speile):
+        for i_data, i_speile in zip(guess, speile):
+          if i_data != KEINE and i_speile != KEINE and i_speile != i_data:
+            return False
+        return True
+
       for dist in distribution(boxes, balls):
-        dist = [ di + mi for di, mi in zip(dist, mask)]
-        data = [[CROSS] * d + [SQUARE] * i for i, d in zip(info, dist)]
-# [[CROSS] * dist[0]]
-        print(info, dist, data)
-        if not self.compare_speile(data, speile):
+        # Add the mask and Convert the 'compressed' representation of crosses and squares to a row
+        guess = inflate([d + m for d, m in zip(dist, mask)], info)
+
+        # Checks if the guess is compatible with the partial solution
+        if not compatible(guess, speile):
           continue 
-        for i in range(len(data)):
-          common_square[i] &= data[i] if data[i] == SQUARE else 0
-          if common_cross[i] == -1:
-            common_cross[i] = -1 if data[i] == -1 else 0 
-      self.set(offset, [cx + cs for cx, cs in zip(common_cross, common_square)], row=row)
-      # self.pprint()
+
+        # Merge the common solution
+        common_square = [SQUARE if c == SQUARE and g == SQUARE else KEINE for c, g in zip(common_square, guess)]
+        common_cross =  [CROSS  if c == CROSS  and g == CROSS  else KEINE for c, g in zip(common_cross, guess)]
+      # Add the common cells together
+      return [cx + cs for cx, cs in zip(common_cross, common_square)]
 
   def step(self):
+    def handle(offset, changes, row):
+      if any(changes):
+        self.set(offset, changes, row=row)
+        self.pprint()
     for y, row in enumerate(self.board):
-      self._check(row, self.vertical[y], y, row=True)
+      handle(y, self.substep(row, self.vertical[y]), row=True)
     for x in range(len(self.board)):
-      temp = [self.board[y][x] for y in range(len(self.board))]
-      self._check(temp, self.horizontal[x], x, row=False)
-    
+      handle(x, self.substep([self.board[y][x] for y in range(len(self.board))], self.horizontal[x]), row=False)
 
   def pprint(self):
-      print(chr(27) + "[2J" + str(self), end='\n\r')
+      print(chr(27) + "[2J" + str(self), end='\n\r') # Print inplace and the escape sequence clears the screen
       sleep(self.sleep)
 
-  @staticmethod
-  def compare_speile(data, speile):
-    for i_data, i_speile in zip(data, speile):
-      if i_data != KEINE and i_speile != KEINE and i_speile != i_data:
-        return False
-    return True
-
   def done(self):
+    # Checks if it stuck
     if self.hash() == self._old:
       return True
     self._old = self.hash()
@@ -88,13 +97,14 @@ class Nanogram:
     if row:
       self.board[offset] = speile
     else:
-      for i in range(len(self.board)):
-        self.board[i][offset] = speile[i]
+      for b, s in zip(self.board, speile):
+        b[offset] = s
 
   def hash(self):
     return "".join(map(str, self.board))
 
   def solve(self):
+    # Iteratively applies constraints
     while not self.done():
       self.step()
 
