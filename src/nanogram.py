@@ -1,6 +1,7 @@
 from tabulate import tabulate
 from distributions import distribution
 from time import sleep
+import toml
 
 SLEEP = .05
 
@@ -9,18 +10,16 @@ CROSS = -1
 KEINE = 0
 
 class Nanogram:
-  def __str__(self):
-    # trans = str.maketrans({SQUARE: "■", KEINE: "", CROSS: "⛌"})
-    field = [[self.vertical[y]] + self.board[y][1:-1] for y in range(1, len(self.board) - 1)]
-    field = [["■" if e == SQUARE else e for e in row] for row in field]
-    field = [["⛌" if e == CROSS else e for e in row] for row in field]
-    field = [["" if e == KEINE else e for e in row] for row in field]
-    return tabulate(field, headers=self.horizontal[1:-1], tablefmt="fancy_grid", stralign="center")
+  @classmethod
+  def load(cls, path, **kwargs):
+    data = toml.load(path)
+    return cls(data["horizontal"], data["vertical"], **kwargs)
 
-  def __init__(self, horizontal, vertical):
+  def __init__(self, horizontal, vertical, **kwargs):
     self.horizontal = [[0]] + horizontal + [[0]]
     self.vertical = [[0]] + vertical  + [[0]]
     self.board = [[KEINE for v in range(len(self.vertical))] for h in range(len(self.horizontal))]
+    self.sleep = kwargs["sleep"] or SLEEP
     self.pre_dists = {
       "ROW": [None for _ in self.board],
       "COL": [None for _ in self.board],
@@ -31,7 +30,14 @@ class Nanogram:
     for i in range(len(self.board)):
       self.board[i][0] = CROSS
       self.board[i][-1] = CROSS
-       
+
+  def __str__(self):
+    # trans = str.maketrans({SQUARE: "■", KEINE: "", CROSS: "⛌"})
+    field = [[self.vertical[y]] + self.board[y][1:-1] for y in range(1, len(self.board) - 1)]
+    field = [["■" if e == SQUARE else e for e in row] for row in field]
+    field = [["⛌" if e == CROSS else e for e in row] for row in field]
+    field = [["" if e == KEINE else e for e in row] for row in field]
+    return tabulate(field, headers=self.horizontal[1:-1], tablefmt="fancy_grid", stralign="center")
 
   def check(self):
     for y, row in enumerate(self.board):
@@ -70,9 +76,11 @@ class Nanogram:
       for i in range(len(overall_data_cross)):
         overall_data[i] = overall_data_cross[i] + overall_data_square[i]
       self.set(offset, overall_data,row=row)
-      print(chr(27) + "[2J" + str(self), end='\r')
-      sleep(SLEEP)
+      self.pprint()
 
+  def pprint(self):
+      print(chr(27) + "[2J" + str(self), end='\n\r')
+      sleep(self.sleep)
 
   @staticmethod
   def compare_speile(data, speile):
