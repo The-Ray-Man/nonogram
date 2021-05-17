@@ -3,8 +3,6 @@ from distributions import distribution
 from time import sleep
 import toml
 
-SLEEP = .05
-
 SQUARE = 1
 CROSS = -1
 KEINE = 0
@@ -21,7 +19,7 @@ class Nanogram:
     self.horizontal = horizontal
     self.vertical = vertical
     self.board = [[KEINE for v in range(len(self.vertical))] for h in range(len(self.horizontal))]
-    self.sleep = kwargs["sleep"] or SLEEP
+    self.sleep = kwargs["sleep"] or False
     self._old = None
 
   @classmethod
@@ -80,7 +78,8 @@ class Nanogram:
 
   def pprint(self):
       print(chr(27) + "[2J" + str(self), end='\n\r') # Print inplace and the escape sequence clears the screen
-      sleep(self.sleep)
+      if self.sleep:
+        sleep(self.sleep)
 
   def done(self):
     return all(i != KEINE for line in self.board for i in line)
