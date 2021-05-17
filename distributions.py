@@ -1,14 +1,6 @@
-import itertools
 import pickle
 
 DUMP_FILE = "precomputation.pyb"
-
-# Old and inefficient version
-def ddistribution(boxes, balls):
-  rng = list(range(balls + 1)) * boxes
-  dist = set(i for i in itertools.permutations(rng, boxes) if sum(i) == balls)
-  return dist
-
 
 def _distribution(boxes, balls):
     table = {}
