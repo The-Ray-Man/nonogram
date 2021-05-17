@@ -82,11 +82,7 @@ class Nanogram:
       sleep(self.sleep)
 
   def done(self):
-    for line in self.board:
-      for x in line:
-        if x == KEINE:
-          return False
-    return True
+    return any(i == KEINE for line in self.board for i in line)
 
   def set(self, offset, speile, row=True):
     if row:
