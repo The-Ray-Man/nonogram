@@ -1,5 +1,8 @@
 from tabulate import tabulate
 from distributions import distribution
+from time import sleep
+
+SLEEP = .05
 
 SQUARE = 1
 CROSS = -1
@@ -32,12 +35,10 @@ class Nanogram:
 
   def check(self):
     for y, row in enumerate(self.board):
-      # print(y)
       if y==0 or y==len(self.board)-1:
         continue
       self._check(row, self.vertical[y], y, row=True)
     for x in range(len(self.board)):
-      # print(x)
       if x==0 or x==len(self.board)-1:
         continue
       temp = [self.board[y][x] for y in range(len(self.board))]
@@ -69,13 +70,12 @@ class Nanogram:
       for i in range(len(overall_data_cross)):
         overall_data[i] = overall_data_cross[i] + overall_data_square[i]
       self.set(offset, overall_data,row=row)
+      print(chr(27) + "[2J" + str(self), end='\r')
+      sleep(SLEEP)
 
 
   @staticmethod
   def compare_speile(data, speile):
-    # print(data)
-    # print(speile[1:-1])
-    # print("")
     for i_data, i_speile in zip(data, speile[1:-1]):
       if i_data != KEINE and i_speile != KEINE and i_speile != i_data:
         return False
@@ -100,17 +100,13 @@ class Nanogram:
     return "".join(map(str, self.board))
 
   def solve(self):
-    print(self)
     old = self.hash()
     while True:
       self.check()
-      print(self)
       if self.hash() == old:
-        print("Unchanged")
         break
       old = self.hash()
       if self.done():
-        print("solved!")
         break
 
 
