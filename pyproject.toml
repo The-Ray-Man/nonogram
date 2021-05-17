@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "nonogram"
+version = "0.1.0"
+description = "Solver for the nonogram puzzle where you need to fill out a grid given clues for each row and column"
+authors = ["Gottschali <aligottschall22@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+tabulate = "^0.8.9"
+toml = "^0.10.2"
+click = "^8.0.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
