@@ -24,6 +24,14 @@ class Board(list):
             for b, s in zip(self, speile):
                 b[offset] = s
 
+    def empty(self):
+        res = []
+        for y, row in enumerate(self):
+            for x, i in enumerate(row):
+                if i == KEINE:
+                    res.append((x, y))
+        return res
+
     def constraints(self):
         def transform(group):
             return list(map(lambda x: x[1], filter(lambda x: x[0]==1, ((k, len(list(g))) for k, g in group))))
