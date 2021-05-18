@@ -1,4 +1,6 @@
-from constants import *
+from constants import KEINE
+
+# TODO verify function
 
 class Board(list):
   def __init__(self, size, data=None):

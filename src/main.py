@@ -1,6 +1,7 @@
 import click
 
-from nanogram import Puzzle, Solver
+from solver import Solver
+from puzzle import Puzzle
 
 @click.command()
 @click.argument('puzzles', nargs=-1, type=click.File('rt'))
