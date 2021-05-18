@@ -1,6 +1,5 @@
 from time import sleep
 
-from distributions import distribution
 from puzzle import Puzzle
 from constants import *
 
@@ -12,32 +11,9 @@ class Solver:
   def substep(self, speile, info):
       # if info is 1 2 1
       # there needs to be at least a cross in the interior gaps: 1 x 2 x 1
-      mask = [KEINE] + [SQUARE for _ in range(len(info) -1 )] + [KEINE]
-      balls = len(speile) - sum(mask) - sum(info)
-      boxes = len(mask)
       common_square = [  1 for _ in speile]
       common_cross  = [ -1 for _ in speile]
-
-      def inflate(crosses, info):
-        data = [CROSS] * crosses[0]
-        for i, d in zip(info, crosses[1:]):
-          data.extend([SQUARE] * i + [CROSS] * d)
-        return data
-
-      def compatible(guess, speile):
-        for i_data, i_speile in zip(guess, speile):
-          if i_data != KEINE and i_speile != KEINE and i_speile != i_data:
-            return False
-        return True
-
-      for dist in distribution(boxes, balls):
-        # Add the mask and Convert the 'compressed' representation of crosses and squares to a row
-        guess = inflate([d + m for d, m in zip(dist, mask)], info)
-
-        # Checks if the guess is compatible with the partial solution
-        if not compatible(guess, speile):
-          continue 
-
+      for guess in self.puzzle.candidates(info, speile):
         # Merge the common solution
         common_square = [SQUARE if c == SQUARE and g == SQUARE else KEINE for c, g in zip(common_square, guess)]
         common_cross =  [CROSS  if c == CROSS  and g == CROSS  else KEINE for c, g in zip(common_cross, guess)]

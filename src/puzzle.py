@@ -3,6 +3,7 @@ from tabulate import tabulate
 
 from constants import *
 from board import Board
+from distributions import distribution
 
 class Puzzle:
     def __init__(self, horizontal, vertical, **kwargs):
@@ -30,4 +31,26 @@ class Puzzle:
             if not constraint == squares:
                 return False
         return self.board.done()
+
+    def candidates(self, info, speile):
+        mask = [KEINE] + [SQUARE for _ in range(len(info) -1 )] + [KEINE]
+        balls = len(speile) - sum(mask) - sum(info)
+        boxes = len(mask)
+        def compatible(guess, speile):
+            for i_data, i_speile in zip(guess, speile):
+                if i_data != KEINE and i_speile != KEINE and i_speile != i_data:
+                    return False
+            return True
+        def inflate(crosses, info):
+            data = [CROSS] * crosses[0]
+            for i, d in zip(info, crosses[1:]):
+                data.extend([SQUARE] * i + [CROSS] * d)
+            return data
+
+        for dist in distribution(boxes, balls):
+            # Add the mask and Convert the 'compressed' representation of crosses and squares to a row
+            guess = inflate([d + m for d, m in zip(dist, mask)], info)
+            # Checks if the guess is compatible with the partial solution
+            if compatible(guess, speile):
+                yield guess 
 
