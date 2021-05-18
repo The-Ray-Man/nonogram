@@ -9,27 +9,50 @@ KEINE = 0
 
 # TODO verify function
 
-def translate(row):
-    row = ["■" if e == SQUARE else e for e in row]
-    row = ["⛌" if e == CROSS else e for e in row]
-    return ["" if e == KEINE else e for e in row]
+class Board(list):
+  def __init__(self, size, data=None):
+    w, h = size
+    for y in range(h):
+      if data is None:
+        self.append([KEINE for x in range(w)])
+      else:
+        self.append(data[y])
 
-class Nanogram:
+  def done(self):
+    return all(i != KEINE for line in self for i in line)
+
+  def set(self, offset, speile, row=True):
+    if row:
+      self[offset] = speile
+    else:
+      for b, s in zip(self, speile):
+        b[offset] = s
+
+
+class Puzzle:
   def __init__(self, horizontal, vertical, **kwargs):
     self.horizontal = horizontal
     self.vertical = vertical
-    self.board = [[KEINE for v in range(len(self.vertical))] for h in range(len(self.horizontal))]
-    self.sleep = kwargs["sleep"] or False
-    self._old = None
+    self.board = Board((len(self.horizontal), len(self.vertical)))
+
+  def __str__(self):
+    def translate(row):
+      row = ["■" if e == SQUARE else e for e in row]
+      row = ["⛌" if e == CROSS else e for e in row]
+      return ["" if e == KEINE else e for e in row]
+    field = [[v] + translate(row) for v, row in zip(self.vertical, self.board)]
+    return tabulate(field, headers=self.horizontal, tablefmt="fancy_grid", stralign="center")
 
   @classmethod
   def load(cls, path, **kwargs):
     data = toml.load(path)
     return cls(data["horizontal"], data["vertical"], **kwargs)
 
-  def __str__(self):
-    field = [[v] + translate(row) for v, row in zip(self.vertical, self.board)]
-    return tabulate(field, headers=self.horizontal, tablefmt="fancy_grid", stralign="center")
+
+class Solver:
+  def __init__(self, puzzle, sleep=0):
+    self.puzzle = puzzle
+    self.sleep = sleep or False
 
   def substep(self, speile, info):
       # if info is 1 2 1
@@ -69,33 +92,19 @@ class Nanogram:
   def step(self):
     def handle(offset, changes, row):
       if any(changes):
-        self.set(offset, changes, row=row)
+        self.puzzle.board.set(offset, changes, row=row)
         self.pprint()
-    for y, row in enumerate(self.board):
-      handle(y, self.substep(row, self.vertical[y]), row=True)
-    for x in range(len(self.board)):
-      handle(x, self.substep([self.board[y][x] for y in range(len(self.board))], self.horizontal[x]), row=False)
+    for y, row in enumerate(self.puzzle.board):
+      handle(y, self.substep(row, self.puzzle.vertical[y]), row=True)
+    for x in range(len(self.puzzle.board)):
+      handle(x, self.substep([self.puzzle.board[y][x] for y in range(len(self.puzzle.board))], self.puzzle.horizontal[x]), row=False)
 
   def pprint(self):
-      print(chr(27) + "[2J" + str(self), end='\n\r') # Print inplace and the escape sequence clears the screen
+      print(chr(27) + "[2J" + str(self.puzzle), end='\n\r') # Print inplace and the escape sequence clears the screen
       if self.sleep:
         sleep(self.sleep)
 
-  def done(self):
-    return all(i != KEINE for line in self.board for i in line)
-
-  def set(self, offset, speile, row=True):
-    if row:
-      self.board[offset] = speile
-    else:
-      for b, s in zip(self.board, speile):
-        b[offset] = s
-
-  def hash(self):
-    return "".join(map(str, self.board))
-
   def solve(self):
     # Iteratively applies constraints
-    while not self.done():
+    while not self.puzzle.board.done():
       self.step()
-
