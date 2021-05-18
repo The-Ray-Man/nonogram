@@ -1,5 +1,6 @@
-from constants import KEINE
+from constants import KEINE, translate
 from itertools import groupby
+from tabulate import tabulate
 
 class Board(list):
     def __init__(self, size, data=None):
@@ -26,4 +27,8 @@ class Board(list):
         for x in range(self.w):
             col = [self[y][x] for y in range(self.h)]
             yield [(k, len(list(g))) for k, g in groupby(col)]
+
+    def __str__(self):
+        field = [translate(row) for row in self]
+        return tabulate(field, tablefmt="fancy_grid", stralign="center")
 

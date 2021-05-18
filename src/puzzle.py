@@ -12,10 +12,6 @@ class Puzzle:
         self.board = Board((len(self.horizontal), len(self.vertical)))
 
     def __str__(self):
-        def translate(row):
-            row = ["■" if e == SQUARE else e for e in row]
-            row = ["⛌" if e == CROSS else e for e in row]
-            return ["" if e == KEINE else e for e in row]
         field = [[v] + translate(row) for v, row in zip(self.vertical, self.board)]
         return tabulate(field, headers=self.horizontal, tablefmt="fancy_grid", stralign="center")
 
@@ -32,7 +28,7 @@ class Puzzle:
                 return False
         return self.board.done()
 
-    def candidates(self, info, speile):
+    def candidates(self,, balls, mask, info, speile):
         mask = [KEINE] + [SQUARE for _ in range(len(info) -1 )] + [KEINE]
         balls = len(speile) - sum(mask) - sum(info)
         boxes = len(mask)
