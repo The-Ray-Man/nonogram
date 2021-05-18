@@ -21,12 +21,14 @@ class Board(list):
             for b, s in zip(self, speile):
                 b[offset] = s
 
-    def verify(self):
-        for row in self:
-            yield [(k, len(list(g))) for k, g in groupby(row)]
-        for x in range(self.w):
-            col = [self[y][x] for y in range(self.h)]
-            yield [(k, len(list(g))) for k, g in groupby(col)]
+    def constraints(self):
+        def transform(group):
+            k, g = group
+            m = len(list(g))
+            return list(map(lambda x: x[1], filter(lambda x: x[0]==1, (k, m))))
+        horizonal = [[transform(groupby(row))] for row in self]
+        vertical = [[transform(groupby(col))] for _ range(self.w)]
+        return horizonal, vertical
 
     def __str__(self):
         field = [translate(row) for row in self]

@@ -22,10 +22,9 @@ class Puzzle:
 
     def verify(self):
         """ Checks if all constrains are fulfilled """
-        for group, constraint in zip(self.board.verify(), self.vertical + self.horizontal):
-            squares = list(map(lambda x: x[1], filter(lambda x: x[0]==1, group)))
-            if not constraint == squares:
-                return False
+        vert, hor = self.board.constraints()
+        if vert != self.vertical or hor != self.horizontal:
+            return False
         return self.board.done()
 
     def candidates(self,, balls, mask, info, speile):
