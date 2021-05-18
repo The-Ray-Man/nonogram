@@ -26,10 +26,10 @@ class Solver:
       if any(changes):
         self.puzzle.board.set(offset, changes, row=row)
         if self.verbose:
-        self.pprint()
+          self.pprint()
     for y, row in enumerate(self.puzzle.board):
       handle(y, self.substep(row, self.puzzle.vertical[y]), row=True)
-    for x in range(len(self.puzzle.board)):
+    for x in range(len(self.puzzle.board[0])):
       handle(x, self.substep([self.puzzle.board[y][x] for y in range(len(self.puzzle.board))], self.puzzle.horizontal[x]), row=False)
 
   def pprint(self):
@@ -37,12 +37,25 @@ class Solver:
       if self.sleep:
         sleep(self.sleep)
 
+  def backtrack(self):
+      # CRITICAL: changes made by solver afterwards are not undood
+      # Make a new solver each time?
+      x, y = self.puzzle.board.empty()[0]
+      self.puzzle.board[y][x] = SQUARE
+      self.step()
+      if self.puzzle.verify():
+          return True
+      if self.backtrack():
+          return True
+      # Backtrack
+      self.puzzle.board[y][x] = CROSS
+
   def solve(self):
     # Iteratively applies constraints
     old = None
     while not self.puzzle.verify():
       if self.puzzle.board == old:
-        return self.puzzle
+        self.backtrack()
       old = self.puzzle.board[:]
       self.step()
-    return True
+    return self.puzzle
