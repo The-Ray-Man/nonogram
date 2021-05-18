@@ -20,6 +20,11 @@ class Puzzle:
         data = toml.load(path)
         return cls(data["horizontal"], data["vertical"], **kwargs)
 
+    @classmethod
+    def from_board(cls, board):
+        constraints = board.constraints()
+        return cls(*constraints)
+
     def verify(self):
         """ Checks if all constrains are fulfilled """
         hor, ver = self.board.constraints()
