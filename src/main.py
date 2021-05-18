@@ -9,7 +9,7 @@ from puzzle import Puzzle
 def solve(puzzles, sleep):
   for puzzle in puzzles:
     puzzle = Puzzle.load(puzzle)
-    s = Solver(puzzle, sleep=sleep)
+    s = Solver(puzzle, verbose=True, sleep=sleep)
     s.solve()
 
 if __name__ == "__main__":

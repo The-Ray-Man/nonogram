@@ -4,9 +4,10 @@ from puzzle import Puzzle
 from constants import *
 
 class Solver:
-  def __init__(self, puzzle, sleep=0):
+  def __init__(self, puzzle, verbose=False, sleep=False):
     self.puzzle = puzzle
-    self.sleep = sleep or False
+    self.verbose = verbose
+    self.sleep = sleep
 
   def substep(self, speile, info):
       # if info is 1 2 1
@@ -24,6 +25,7 @@ class Solver:
     def handle(offset, changes, row):
       if any(changes):
         self.puzzle.board.set(offset, changes, row=row)
+        if self.verbose:
         self.pprint()
     for y, row in enumerate(self.puzzle.board):
       handle(y, self.substep(row, self.puzzle.vertical[y]), row=True)
