@@ -4,9 +4,6 @@ from distributions import distribution
 from puzzle import Puzzle
 from constants import *
 
-# TODO verify function
-
-
 class Solver:
   def __init__(self, puzzle, sleep=0):
     self.puzzle = puzzle
@@ -64,5 +61,5 @@ class Solver:
 
   def solve(self):
     # Iteratively applies constraints
-    while not self.puzzle.board.done():
+    while not self.puzzle.verify():
       self.step()
