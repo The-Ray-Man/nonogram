@@ -37,5 +37,10 @@ class Solver:
 
   def solve(self):
     # Iteratively applies constraints
+    old = None
     while not self.puzzle.verify():
+      if self.puzzle.board == old:
+        return self.puzzle
+      old = self.puzzle.board[:]
       self.step()
+    return True
