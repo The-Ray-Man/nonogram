@@ -1,11 +1,9 @@
 from tabulate import tabulate
-from distributions import distribution
 from time import sleep
 import toml
 
-SQUARE = 1
-CROSS = -1
-KEINE = 0
+from distributions import distribution
+from constants import *
 
 # TODO verify function
 

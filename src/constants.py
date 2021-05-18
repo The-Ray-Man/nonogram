@@ -1,0 +1,3 @@
+SQUARE = 1
+CROSS = -1
+KEINE = 0
