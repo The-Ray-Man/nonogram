@@ -22,12 +22,12 @@ class Puzzle:
 
     def verify(self):
         """ Checks if all constrains are fulfilled """
-        vert, hor = self.board.constraints()
-        if vert != self.vertical or hor != self.horizontal:
+        hor, ver = self.board.constraints()
+        if ver != self.vertical or hor != self.horizontal:
             return False
         return self.board.done()
 
-    def candidates(self,, balls, mask, info, speile):
+    def candidates(self, info, speile):
         mask = [KEINE] + [SQUARE for _ in range(len(info) -1 )] + [KEINE]
         balls = len(speile) - sum(mask) - sum(info)
         boxes = len(mask)

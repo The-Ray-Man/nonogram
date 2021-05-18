@@ -11,6 +11,9 @@ class Board(list):
             else:
                 self.append(data[y])
 
+    def __str__(self):
+        return tabulate(list(map(translate, self)), tablefmt="fancy_grid", stralign="center")
+
     def done(self):
         return all(i != KEINE for line in self for i in line)
 
@@ -23,14 +26,8 @@ class Board(list):
 
     def constraints(self):
         def transform(group):
-            k, g = group
-            m = len(list(g))
-            return list(map(lambda x: x[1], filter(lambda x: x[0]==1, (k, m))))
-        horizonal = [[transform(groupby(row))] for row in self]
-        vertical = [[transform(groupby(col))] for _ range(self.w)]
-        return horizonal, vertical
-
-    def __str__(self):
-        field = [translate(row) for row in self]
-        return tabulate(field, tablefmt="fancy_grid", stralign="center")
-
+            return list(map(lambda x: x[1], filter(lambda x: x[0]==1, ((k, len(list(g))) for k, g in group))))
+        vertical = [transform(groupby(row)) for row in self]
+        cols = [[self[y][x] for y in range(self.h)] for x in range(self.w)]
+        horizontal = [transform(groupby(col)) for col in cols]
+        return horizontal, vertical
